@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://openbio.page/"><img src="https://img.shields.io/badge/Docs-openbio.page-3A5BFF?style=flat-square" alt="Documentation" /></a>
   <a href="https://openbio.page/#live"><img src="https://img.shields.io/badge/Examples-live-3A5BFF?style=flat-square" alt="Live examples" /></a>
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/Code%20license-MIT-green?style=flat-square" alt="Code license: MIT" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Code%20license-MIT-green?style=flat-square" alt="Code license: MIT" /></a>
   <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue-3-42B883?style=flat-square&logo=vuedotjs&logoColor=white" alt="Vue 3" /></a>
   <a href="https://vite.dev/"><img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite 8" /></a>
   <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" /></a>
@@ -33,6 +33,7 @@
   <a href="#how-it-works">How it works</a> ·
   <a href="#deploy">Deploy</a> ·
   <a href="#docs">Docs</a> ·
+  <a href="#contributing">Contributing</a> ·
   <a href="#repository-structure">Structure</a>
 </p>
 
@@ -172,8 +173,12 @@ open-bio-page/
 ├── template/             blank site.json, one profile and a CNAME placeholder
 ├── worker/               Cloudflare Worker package and local Bun API
 ├── .github/workflows/    CI, docs, site and Worker deploys
-└── DEPLOY.md · LICENSE.md · README.md
+└── CHANGELOG.md · CONTRIBUTING.md · DEPLOY.md · LICENSE · LICENSE.md · README.md
 ```
+
+## Contributing
+
+Local setup, code style, pull requests, and issue reports are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Author
 
@@ -185,4 +190,4 @@ Created by [Massimo De Luisa](https://deluisa.me).
 
 ## License
 
-The source code is MIT. The content (copy, images and personal material) is All Rights Reserved. See [LICENSE.md](LICENSE.md).
+The root [LICENSE](LICENSE) file covers the source code (MIT). [LICENSE.md](LICENSE.md) explains the content carve-out: bios, media, and branding stay All Rights Reserved.
