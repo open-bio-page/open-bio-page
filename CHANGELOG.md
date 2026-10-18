@@ -10,7 +10,7 @@ The `1.0.0` date is left as TODO until the day the tag is created. This file doe
 
 ### Fixed
 
-- Deploy admin worker: use `--autoconfig=false` (wrangler 4.103 dropped `--x-autoconfig`), skip with a notice when `CLOUDFLARE_API_TOKEN` is missing, and skip empty Worker secrets.
+- Deploy admin worker: use `--autoconfig=false` (wrangler 4.101.0 replaced `--x-autoconfig`), skip with a notice when `CLOUDFLARE_API_TOKEN` is missing, and deploy Worker code and secrets as one version with `--secrets-file` (unset secrets keep their current value).
 - CI: add a credential-free `wrangler deploy --dry-run` check.
 
 ### Removed
