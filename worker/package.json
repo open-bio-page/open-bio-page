@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "bun dev-server.ts",
-    "deploy": "wrangler deploy --x-autoconfig=false --config wrangler.toml"
+    "deploy": "wrangler deploy --autoconfig=false --config wrangler.toml"
   }
 }

@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 The `1.0.0` date is left as TODO until the day the tag is created. This file does not create that tag.
 
+## [Unreleased]
+
+### Fixed
+
+- Deploy admin worker: use `--autoconfig=false` (wrangler 4.103 dropped `--x-autoconfig`), skip with a notice when `CLOUDFLARE_API_TOKEN` is missing, and skip empty Worker secrets.
+- CI: add a credential-free `wrangler deploy --dry-run` check.
+
+### Removed
+
+- `ISREADYAI_API_KEY` from `secrets.local.example`. The IsReady.AI Fix workflow was retired on 2026-10-07; see `DEPLOY.md`.
+
 ## [1.0.0] - TODO
 
 First public listing of the template that is on `master` today.
