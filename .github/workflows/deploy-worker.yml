@@ -7,32 +7,70 @@ on:
       - 'worker/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-worker-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     if: github.repository != 'open-bio-page/open-bio-page'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v6
+      - name: Check Cloudflare credentials
+        id: cf
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo "::notice title=Deploy admin worker skipped::CLOUDFLARE_API_TOKEN is not set, so the admin Worker was not deployed. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID under Settings > Secrets and variables > Actions to enable it."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.cf.outputs.enabled == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        if: steps.cf.outputs.enabled == 'true'
         with:
           bun-version: 1.3.14
 
       - run: bun install --frozen-lockfile
+        if: steps.cf.outputs.enabled == 'true'
 
-      - name: Deploy and push secrets
+      - name: Deploy Worker with secrets
+        if: steps.cf.outputs.enabled == 'true'
         env:
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           POSTHOG_READ_KEY: ${{ secrets.POSTHOG_READ_KEY }}
           ADMIN_USERS: ${{ secrets.ADMIN_USERS }}
         run: |
-          CFG="--config worker/wrangler.toml"
-          bunx wrangler deploy --x-autoconfig=false $CFG
-          printf '%s' "$SESSION_SECRET"     | bunx wrangler secret put SESSION_SECRET   $CFG
-          printf '%s' "$ADMIN_GITHUB_TOKEN" | bunx wrangler secret put GITHUB_TOKEN      $CFG
-          printf '%s' "$POSTHOG_READ_KEY"   | bunx wrangler secret put POSTHOG_READ_KEY  $CFG
-          printf '%s' "$ADMIN_USERS"        | bunx wrangler secret put ADMIN_USERS       $CFG
+          set -euo pipefail
+          # Code and secrets go up as ONE Worker version (wrangler deploy --secrets-file).
+          # Secrets left out of the file keep their current value on the Worker.
+          for pair in SESSION_SECRET:SESSION_SECRET GITHUB_TOKEN:ADMIN_GITHUB_TOKEN POSTHOG_READ_KEY:POSTHOG_READ_KEY ADMIN_USERS:ADMIN_USERS; do
+            worker="${pair%%:*}" gh="${pair#*:}"
+            if [ -z "${!gh}" ]; then
+              echo "::warning::$gh is not set; Worker secret $worker keeps its current value (or stays unset)"
+            fi
+          done
+          umask 077
+          SECRETS_FILE="$RUNNER_TEMP/worker-secrets.json"
+          trap 'rm -f "$SECRETS_FILE"' EXIT
+          # Values are read from env by jq, never passed on the command line.
+          jq -n '{
+            SESSION_SECRET: env.SESSION_SECRET,
+            GITHUB_TOKEN: env.ADMIN_GITHUB_TOKEN,
+            POSTHOG_READ_KEY: env.POSTHOG_READ_KEY,
+            ADMIN_USERS: env.ADMIN_USERS
+          } | with_entries(select((.value // "") != ""))' > "$SECRETS_FILE"
+          bunx wrangler deploy --autoconfig=false --config worker/wrangler.toml --secrets-file "$SECRETS_FILE"

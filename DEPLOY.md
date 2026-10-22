@@ -59,6 +59,8 @@ Also set:
 | `POSTHOG_READ_KEY` | Personal/project API key for admin stats |
 | `ADMIN_USERS` | JSON array of `{ user, slug, salt, passHash }` |
 
+If `CLOUDFLARE_API_TOKEN` is not set, the Deploy admin worker workflow skips with a notice instead of failing. An empty Worker secret is skipped with a warning instead of being uploaded empty.
+
 Generate users:
 
 ```sh
@@ -105,7 +107,7 @@ bun lint
 git push origin master
 ```
 
-Or run a workflow by hand from Actions: Deploy docs, Deploy site, or Deploy admin worker. Upstream runs Deploy docs. A fork runs Deploy site and Deploy admin worker.
+Or run a workflow by hand from Actions: Deploy docs, Deploy site, or Deploy admin worker. Upstream runs Deploy docs. A fork runs Deploy site and Deploy admin worker. On `open-bio-page/open-bio-page` itself, Deploy site and Deploy admin worker show as skipped on purpose, because GitHub Pages serves one site per repository and upstream uses it for the docs.
 
 If Deploy site sits on `deploy-pages` and times out after about 10 minutes, do not cancel it and push again in a loop. Cancelling a Pages deploy that is already running can leave the environment stuck. Wait for the run to finish, or cancel once, then use Re-run failed jobs. The workflow sets `concurrency.cancel-in-progress: false`, so a new push will not abort a deploy that is already going.
 
@@ -136,3 +138,7 @@ bun run docs:dev
 - One `ADMIN_USERS` entry per person; slug must match their `content/bios/<slug>.json`
 - Rotate `SESSION_SECRET` if a cookie is leaked (invalidates all sessions)
 - Instance secrets belong on the GitHub fork, not on a repo you copied by hand
+
+## Retired workflows
+
+- `IsReady.AI Fix` (`.github/workflows/isreadyai-fix.yml`) was removed on 2026-10-07 with the Open Bio rebrand. It audited the former `deluisa.bio` instance, and its last fix (`public/robots.txt`) is already merged. A fork that wants automated AI-readiness PRs can add `isreadyai/fix-action@v1` itself. It needs an `ISREADYAI_API_KEY` secret, and Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests" turned on. Without that setting the action pushes its branch but cannot open the PR. That matches the run that failed on 2026-07-06: it pushed `feature/ai-readiness-fixes` and opened no PR.
